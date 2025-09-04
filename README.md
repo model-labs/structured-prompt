@@ -6,10 +6,11 @@ A framework for creating **extensible**, **reusable**, and **standardized** prom
 
 This framework addresses the challenge of maintaining consistent, high-quality prompts across teams and AI systems by providing:
 
-1. **Extensibility** - Add new prompt sections and modify existing ones without breaking the core structure
+1. **Extensibility** - Add new prompt sections and modify existing ones without breaking the core structure and following the same semantic conventions, bullets indentation etc.
 2. **Reusability** - Share and compose prompt components across different use cases and teams
 3. **Standardization** - Enforce consistent prompt structure and formatting within your organization
 4. **LLM-Friendly** - Enable AI systems to understand and modify prompts programmatically
+5. **Self-Introspection** (TBD) - Support APIs to evaluate the rendered prompt for inconsistencies and ambiguities
 
 ## Key Features
 
@@ -76,6 +77,8 @@ generator.generate("src/stages.py")
 
 ### 3. Build Your Prompt
 
+The framework supports multiple ways to define a prompt. In most cases assigning an array would extend the existing prompt rather than override it:
+
 ```python
 from src.builder.dynamic_prompt_builder import DigmaStructuredPrompt, PromptSection
 from src.stages import Stages
@@ -88,15 +91,6 @@ prompt[Stages.Objective] = [
     "Analyze the provided incident and identify root causes",
     "Provide actionable recommendations for resolution"
 ]
-
-prompt[Stages.Planning] = PromptSection(
-    title="Investigation Plan",
-    items=[
-        "Review system logs and metrics",
-        "Analyze error patterns and correlations",
-        "Identify potential infrastructure issues"
-    ]
-)
 
 # Add nested content
 prompt[Stages.Planning.Steps] = [
@@ -242,7 +236,7 @@ python -m src.generator.prompt_structure_generator --input stages.yaml --output 
 
 ## License
 
-[Add your license information here]
+[MIT](https://github.com/model-labs/structured-prompt/blob/main/LICENSE)
 
 ---
 
