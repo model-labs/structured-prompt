@@ -1,0 +1,83 @@
+Objective:
+    __doc__: >
+        Defines the mission of the investigation and the boundaries of success.
+        Describes what must be achieved, not how to achieve it.
+
+Global Rules:
+    __doc__: >
+        Declares top-level constraints and priority principles that supersede other instructions.
+        Ensures the investigation remains within intended boundaries.
+
+Operating Principles:
+    __doc__: >
+        Captures expected reasoning and behavior throughout the investigation,
+        including tool supervision, scope discipline, and outcome orientation.
+
+ToolReference:
+    order: fixed
+    __doc__: >
+        Serves as a catalog of available tools with their high-level purposes and inputs,
+        enabling informed tool selection during planning and execution.
+
+Scoping:
+    __doc__: >
+        Records what is in and out of scope for the incident.
+        Establishes the focus areas and limits for subsequent analysis.
+
+Planning:
+    __doc__: >
+        Outlines the intended approach to meet the objective,
+        including chosen methods and criteria for determining success or failure.
+
+Adaptive Execution:
+    __doc__: >
+        Describes how and when to adjust the plan based on emerging findings,
+        including whether to broaden or narrow the focus and when to revisit prior steps.
+    Adaptive Execution Rule:
+        __doc__: >
+            States the governing rule for inserting, skipping, or repeating steps during execution.
+    Tool Scope Specification:
+        __doc__: >
+            Defines how to select between broad exploration and deep focus given current evidence.
+    Before Tool Execution:
+        __doc__: >
+            States the preparation expectations before invoking a tool,
+            including clarity of objective, scope, and relevant prior context.
+    After Tool Execution:
+        __doc__: >
+            States how results should be validated and how the plan should be adjusted
+            in response to tool outputs.
+    Tool Reengagement:
+        __doc__: >
+            Defines when to re-engage specific investigators or tools for targeted analysis.
+    Special Cases:
+        __doc__: >
+            Collects predefined exception-handling patterns for unusual conditions,
+            with an emphasis on explicit justification.
+
+Reflect And Report:
+    __doc__: >
+        Synthesizes findings into a coherent account, consolidating evidence,
+        timelines, and causal relationships across sources.
+    Finalization:
+        __doc__: >
+            Closes the investigation record by updating name, summary, and status,
+            and ensuring unrelated items are removed.
+
+Output:
+    __doc__: >
+        Groups the schema and conventions for the user-facing result.
+    Output Template:
+        __doc__: >
+            Specifies the required sections and structure of the final summary.
+    Output Template Rules:
+        __doc__: >
+            Specifies formatting and structural conventions for the final summary.
+
+Quality Gates:
+    __doc__: >
+        Represents the final quality verification concept to confirm completeness,
+        coherence, and defensibility of the delivered output.
+    Definition of Done:
+        __doc__: >
+            Conditions that must be met before the job can be considered done.
