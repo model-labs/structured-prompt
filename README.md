@@ -321,6 +321,26 @@ All pull requests automatically run:
 
 The CI must pass before merging.
 
+### Releasing
+
+To create a new release:
+
+1. **Create a git tag** with the version (e.g., `v0.3.0`):
+   ```bash
+   git tag v0.3.0
+   git push origin v0.3.0
+   ```
+
+2. **Create a GitHub release** from the tag
+
+3. The workflow will automatically:
+   - Extract the version from the tag
+   - Update `pyproject.toml` and `__init__.py`
+   - Build the package
+   - Publish to PyPI and TestPyPI
+
+**Note**: The version in the code doesn't need to be manually updated - it's extracted from the git tag during release.
+
 ## License
 
 [MIT](https://github.com/model-labs/structured-prompt/blob/main/LICENSE)
