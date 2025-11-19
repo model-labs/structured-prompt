@@ -4,7 +4,7 @@ import keyword
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 try:
     import yaml  # PyYAML
@@ -208,7 +208,7 @@ def emit_wiring(top_nodes: List[Dict[str, Any]]) -> List[str]:
 class PromptStructureGenerator:
     """Generator for creating Python stage classes from YAML definitions."""
 
-    def __init__(self, yaml_path: str | Path):
+    def __init__(self, yaml_path: Union[str, Path]):
         """Initialize the generator with a YAML file path.
 
         Args:
@@ -218,7 +218,7 @@ class PromptStructureGenerator:
         if not self.yaml_path.exists():
             raise FileNotFoundError(f"YAML file not found: {self.yaml_path}")
 
-    def generate(self, output_path: str | Path) -> None:
+    def generate(self, output_path: Union[str, Path]) -> None:
         """Generate the Python stage classes file.
 
         Args:

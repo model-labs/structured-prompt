@@ -314,7 +314,7 @@ Contributions are welcome! Please follow these guidelines:
 ### CI/CD
 
 All pull requests automatically run:
-- **Tests** on Python 3.8, 3.9, 3.10, 3.11, and 3.12
+- **Tests** on Python 3.13
 - **Linting** with ruff
 - **Type checking** with mypy
 - **Package build** validation

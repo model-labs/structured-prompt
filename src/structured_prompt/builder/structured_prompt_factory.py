@@ -12,7 +12,7 @@ from .sections import PromptSection
 @dataclass
 class StructuredPromptFactory(PromptSection):
     prefs: IndentationPreferences = field(default_factory=IndentationPreferences)
-    prologue: str | None = None
+    prologue: Optional[str] = None
     stage_root: Optional[type] = None
 
     _top_order_map: Dict[str, Tuple[int, bool]] = field(init=False, default_factory=dict)
@@ -20,9 +20,9 @@ class StructuredPromptFactory(PromptSection):
 
     def __init__(
         self,
-        prefs: IndentationPreferences | None = None,
-        prologue: str | None = None,
-        items: Sequence[Union[Item, str]] | None = None,
+        prefs: Optional[IndentationPreferences] = None,
+        prologue: Optional[str] = None,
+        items: Optional[Sequence[Union[Item, str]]] = None,
         title: str = "ROOT",
     ):
         super().__init__(name=title, items=items, title=title)

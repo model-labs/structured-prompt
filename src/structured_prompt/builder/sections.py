@@ -28,7 +28,7 @@ class PromptSection(Item):
     items: List[Item] = field(default_factory=list)
     key: Optional[str] = None
     subtitle: Optional[str] = None
-    bullet_style: str | None | bool = True
+    bullet_style: Union[str, None, bool] = True
     _subindex: Dict[str, "PromptSection"] = field(default_factory=dict, init=False, repr=False)
     _critical_steps: List[_CriticalStep] = field(default_factory=list, init=False, repr=False)
 
@@ -39,7 +39,7 @@ class PromptSection(Item):
         *,
         title: Optional[str] = None,
         subtitle: Optional[str] = None,
-        bullet_style: str | None | bool = True,
+        bullet_style: Union[str, None, bool] = True,
     ):
         self.key = _norm_key(name) if name is not None else None
         self.title = title if title is not None else (_title_from_key(name) if name is not None else "")
@@ -59,7 +59,7 @@ class PromptSection(Item):
             child._stage_root = getattr(self, "_stage_root", None)
             child._stage_root_name = getattr(self, "_stage_root_name", "")
 
-    def add_item(self, item) -> "PromptSection | None":
+    def add_item(self, item) -> Optional["PromptSection"]:
         if isinstance(item, Item):
             self.items.append(item)
             if isinstance(item, PromptSection):
