@@ -413,22 +413,23 @@ class TestGeneratedStagesIntegration:
         for i, line in enumerate(lines):
             if line.strip().startswith("1. Planning"):
                 planning_idx = i
-            elif line.strip().startswith("1. Quality Gates"):
+            elif line.strip().startswith("2. Quality Gates"):
                 quality_gates_idx = i
-            elif line.strip().startswith("1. Scoping"):
-                scoping_idx = i
-            elif line.strip().startswith("4. Tool Reference"):
+            elif line.strip().startswith("3. Tool Reference"):
                 tool_reference_idx = i
+            elif line.strip().startswith("4. Scoping"):
+                scoping_idx = i
 
-        # Verify ToolReference appears in its fixed position (4th)
+        # Verify all sections are found
+        assert planning_idx is not None, f"Planning not found in rendered output: {rendered}"
+        assert quality_gates_idx is not None, f"Quality Gates not found in rendered output: {rendered}"
         assert tool_reference_idx is not None, f"Tool Reference not found in rendered output: {rendered}"
-        assert "4. Tool Reference" in lines[tool_reference_idx]
+        assert scoping_idx is not None, f"Scoping not found in rendered output: {rendered}"
 
-        # Verify other sections appear in expected order (only if they were found)
-        if scoping_idx is not None and planning_idx is not None:
-            assert scoping_idx < planning_idx
-        if planning_idx is not None and quality_gates_idx is not None:
-            assert planning_idx < quality_gates_idx
+        # Verify sections appear in insertion order
+        assert planning_idx < quality_gates_idx
+        assert quality_gates_idx < tool_reference_idx
+        assert tool_reference_idx < scoping_idx
 
     def test_acceptance_example_9_critical_steps(self):
         """Test acceptance example 9: Critical steps (section-level and root-level)."""
