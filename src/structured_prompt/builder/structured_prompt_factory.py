@@ -37,7 +37,7 @@ class StructuredPromptFactory(PromptSection):
         self._top_order_map.update(topo)
         self._insertion_seq_counter = 0
 
-    def _register_top_stage_from_class(self, cls: type, section: "PromptSection") -> None:
+    def _register_top_stage_from_class(self, cls: type, section: PromptSection) -> None:
         if not _is_stage_class(cls):
             return
 
@@ -55,7 +55,7 @@ class StructuredPromptFactory(PromptSection):
 
     def _ensure_top_section_registered(self, sec: PromptSection) -> None:
         if not hasattr(sec, "_insertion_seq"):
-            setattr(sec, "_insertion_seq", self._insertion_seq_counter)
+            sec._insertion_seq = self._insertion_seq_counter
             self._insertion_seq_counter += 1
 
     def _top_fixed_index(self, sec: PromptSection) -> Optional[int]:

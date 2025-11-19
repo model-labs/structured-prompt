@@ -14,10 +14,10 @@ except Exception:  # pragma: no cover
     @dataclass
     class Stage:  # fallback minimal stub
         name: str
-        _parent: Optional["Stage"] = None
-        _root: Optional["Stage"] = None
+        _parent: Optional[Stage] = None
+        _root: Optional[Stage] = None
 
-        def path(self) -> List["Stage"]:
+        def path(self) -> List[Stage]:
             cur: Optional[Stage] = self
             out: List[Stage] = []
             while cur:

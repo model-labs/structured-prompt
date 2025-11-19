@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Iterator
+from typing import Dict, Iterator, List, Optional
 
 
 # ------------------------------------------------------------
@@ -22,7 +22,7 @@ class Stage:
         return child
 
     def path(self) -> List["Stage"]:
-        cur: Optional["Stage"] = self
+        cur: Optional[Stage] = self
         out: List[Stage] = []
         while cur is not None:
             out.append(cur)

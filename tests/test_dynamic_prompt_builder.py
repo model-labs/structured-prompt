@@ -1,7 +1,7 @@
 import pytest
 
 from structured_prompt import StructuredPromptFactory, PromptSection, IndentationPreferences, PromptText
-from tests.stubs.prompt_structure import Stages
+from .stubs.prompt_structure import Stages
 
 
 class TestDynamicPromptBuilder:

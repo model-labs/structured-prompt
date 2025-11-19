@@ -5,15 +5,13 @@ from enum import Enum
 from typing import Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from .helpers import (
+    _CriticalStep,
     _is_stage_class,
     _norm_key,
     _title_from_key,
-    _try_import_generated_stages,
-    _CriticalStep,
 )
-from .items import Item, PromptText, ItemLike, _as_item
+from .items import Item, ItemLike, PromptText, _as_item
 from .preferences import IndentationPreferences
-
 
 try:
     from dynamic_prompt.stage_contract import Stage  # type: ignore
@@ -29,7 +27,7 @@ class PromptSection(Item):
     key: Optional[str] = None
     subtitle: Optional[str] = None
     bullet_style: Union[str, None, bool] = True
-    _subindex: Dict[str, "PromptSection"] = field(default_factory=dict, init=False, repr=False)
+    _subindex: Dict[str, PromptSection] = field(default_factory=dict, init=False, repr=False)
     _critical_steps: List[_CriticalStep] = field(default_factory=list, init=False, repr=False)
 
     def __init__(
@@ -54,12 +52,12 @@ class PromptSection(Item):
             for it in items:
                 self.add_item(it)
 
-    def _propagate_stage_root_to(self, child: "PromptSection") -> None:
+    def _propagate_stage_root_to(self, child: PromptSection) -> None:
         if hasattr(self, "_stage_root"):
             child._stage_root = getattr(self, "_stage_root", None)
             child._stage_root_name = getattr(self, "_stage_root_name", "")
 
-    def add_item(self, item) -> Optional["PromptSection"]:
+    def add_item(self, item) -> Optional[PromptSection]:
         if isinstance(item, Item):
             self.items.append(item)
             if isinstance(item, PromptSection):
@@ -106,7 +104,7 @@ class PromptSection(Item):
             sec = PromptSection(key, title=title)
             sec.key = k
             if _is_stage_class(key):
-                setattr(sec, "_stage_cls", key)
+                sec._stage_cls = key
             self.items.append(sec)
             self._subindex[k] = sec
         return sec
@@ -116,7 +114,7 @@ class PromptSection(Item):
         key: Union[str, Enum, Stage, type],
         value: Union[
             str,
-            "PromptSection",
+            PromptSection,
             Item,
             Sequence[ItemLike],
             Tuple[str, Sequence[ItemLike]],
@@ -146,7 +144,7 @@ class PromptSection(Item):
             for i, item in enumerate(self.items):
                 if isinstance(item, PromptSection) and item.key == k:
                     if hasattr(item, "_insertion_seq") and not hasattr(value, "_insertion_seq"):
-                        setattr(value, "_insertion_seq", getattr(item, "_insertion_seq"))
+                        value._insertion_seq = item._insertion_seq
                     self.items[i] = value
                     break
             else:
@@ -233,7 +231,7 @@ class PromptSection(Item):
             return []
         return parts[1:] if len(parts) > 1 else parts
 
-    def _set_section_by_path(self, path: List[object], new_sec: "PromptSection") -> None:  # shared impl
+    def _set_section_by_path(self, path: List[object], new_sec: PromptSection) -> None:  # shared impl
         parent: PromptSection = self
         for name in path[:-1]:
             sec = parent[name]
@@ -257,7 +255,7 @@ class PromptSection(Item):
         for i, item in enumerate(parent.items):
             if isinstance(item, PromptSection) and item.key == leaf_key:
                 if hasattr(item, "_insertion_seq") and not hasattr(new_sec, "_insertion_seq"):
-                    setattr(new_sec, "_insertion_seq", getattr(item, "_insertion_seq"))
+                    new_sec._insertion_seq = item._insertion_seq
                 parent.items[i] = new_sec
                 replaced = True
                 break
@@ -316,7 +314,7 @@ class PromptSection(Item):
 
     def _append_into_section(
         self,
-        section: "PromptSection",
+        section: PromptSection,
         value: Union[
             str,
             Item,

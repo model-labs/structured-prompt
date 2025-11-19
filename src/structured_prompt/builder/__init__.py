@@ -1,7 +1,7 @@
-from .structured_prompt_factory import StructuredPromptFactory
-from .items import Item, PromptText, ItemLike
+from .items import Item, ItemLike, PromptText
 from .preferences import IndentationPreferences
 from .sections import PromptSection
+from .structured_prompt_factory import StructuredPromptFactory
 
 __all__ = [
     "IndentationPreferences",

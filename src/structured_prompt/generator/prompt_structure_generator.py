@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Tuple, Union
 
 try:
     import yaml  # PyYAML
-except Exception as e:
+except Exception:
     print("This script requires PyYAML. `pip install pyyaml`", file=sys.stderr)
     raise
 
