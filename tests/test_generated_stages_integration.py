@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from builder import StructuredPromptFactory, PromptSection, IndentationPreferences, PromptText
-from generator import generate_stages_module
+from structured_prompt import StructuredPromptFactory, PromptSection, IndentationPreferences, PromptText
+from structured_prompt.generator.prompt_structure_generator import generate_stages_module
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))

@@ -79,7 +79,7 @@ Each test follows this pattern:
 ```python
 def test_append_when_setting_array_value(self):
     """Test that assigning a List[ItemLike] to a section appends items."""
-    prompt = DigmaStructuredPrompt()
+    prompt = StructuredPromptFactory()
     
     # First assignment
     prompt[Stages.AdaptiveExecution] = [

@@ -1,5 +1,10 @@
 # Structured Prompt Framework
 
+[![CI](https://github.com/model-labs/structured-prompt/actions/workflows/ci.yml/badge.svg)](https://github.com/model-labs/structured-prompt/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/structured-prompt.svg)](https://badge.fury.io/py/structured-prompt)
+[![Python Support](https://img.shields.io/pypi/pyversions/structured-prompt.svg)](https://pypi.org/project/structured-prompt/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A framework for creating **extensible**, **reusable**, and **standardized** prompts that can be easily modified by LLMs and adapted across organizations.
 
 ## Project Goals
@@ -68,8 +73,16 @@ stages:
 
 ### 2. Generate Stage Classes
 
+Using the command-line tool:
+
+```bash
+structured-prompt generate stages.yaml -o src/stages.py
+```
+
+Or programmatically:
+
 ```python
-from src.generator.prompt_structure_generator import PromptStructureGenerator
+from structured_prompt import PromptStructureGenerator
 
 generator = PromptStructureGenerator("stages.yaml")
 generator.generate("src/stages.py")
@@ -80,11 +93,11 @@ generator.generate("src/stages.py")
 The framework supports multiple ways to define a prompt. In most cases assigning an array would extend the existing prompt rather than override it:
 
 ```python
-from src.builder.dynamic_prompt_builder import DigmaStructuredPrompt, PromptSection
-from src.stages import Stages
+from structured_prompt import StructuredPromptFactory, PromptSection
+from stages import Stages
 
 # Create a structured prompt
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 # Add content to stages
 prompt[Stages.Objective] = [
@@ -212,27 +225,101 @@ The framework enables AI systems to:
 ## Installation
 
 ```bash
-pip install -r requirements.txt
+pip install structured-prompt
 ```
+
+For development:
+
+```bash
+git clone https://github.com/model-labs/structured-prompt
+cd structured-prompt
+pip install -e ".[dev]"
+```
+
+## CLI Reference
+
+The `structured-prompt` command-line tool provides utilities for working with the framework.
+
+### Getting Help
+
+```bash
+# Show all available commands
+structured-prompt --help
+
+# Show help for a specific command
+structured-prompt generate --help
+```
+
+### Generate Command
+
+Generate Python stage classes from a YAML definition:
+
+```bash
+# Basic usage
+structured-prompt generate stages.yaml -o src/stages.py
+
+# With custom paths
+structured-prompt generate config/prompt_structure.yaml -o myapp/prompts/stages.py
+```
+
+**Arguments:**
+- `input` - Path to the input YAML file containing stage definitions
+- `-o, --output` - Path where the generated Python file should be written
 
 ## Development
 
 ### Running Tests
 ```bash
-python -m pytest tests/
+pytest tests/
+```
+
+### Linting and Type Checking
+```bash
+# Run ruff linter
+ruff check src/
+
+# Run type checker
+mypy src/structured_prompt
 ```
 
 ### Generating Stages
+
+Using the CLI tool:
+
 ```bash
-python -m src.generator.prompt_structure_generator --input stages.yaml --output src/stages.py
+structured-prompt generate stages.yaml -o src/stages.py
+```
+
+Or programmatically:
+
+```python
+from structured_prompt import PromptStructureGenerator
+
+generator = PromptStructureGenerator("stages.yaml")
+generator.generate("src/stages.py")
 ```
 
 ## Contributing
 
-1. Follow the existing code structure and patterns
-2. Add tests for new features
-3. Update documentation for API changes
-4. Ensure generated code follows the established format
+Contributions are welcome! Please follow these guidelines:
+
+1. **Fork the repository** and create a feature branch
+2. **Follow the existing code structure** and patterns
+3. **Add tests** for new features (we aim for high test coverage)
+4. **Run the test suite** and ensure all tests pass
+5. **Run linters** (`ruff check src/`) to ensure code quality
+6. **Update documentation** for API changes
+7. **Submit a pull request** with a clear description of changes
+
+### CI/CD
+
+All pull requests automatically run:
+- **Tests** on Python 3.8, 3.9, 3.10, 3.11, and 3.12
+- **Linting** with ruff
+- **Type checking** with mypy
+- **Package build** validation
+
+The CI must pass before merging.
 
 ## License
 

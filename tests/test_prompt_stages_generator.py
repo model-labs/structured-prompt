@@ -4,8 +4,17 @@ from unittest.mock import patch, mock_open
 
 import pytest
 
-from generator.prompt_structure_generator import load_yaml, _normalize_mapping_to_nodes, _normalize_node, to_identifier, \
-    emit_class_tree, qname, collect_paths, emit_wiring, generate_stages_module
+from structured_prompt.generator.prompt_structure_generator import (
+    load_yaml,
+    _normalize_mapping_to_nodes,
+    _normalize_node,
+    to_identifier,
+    emit_class_tree,
+    qname,
+    collect_paths,
+    emit_wiring,
+    generate_stages_module,
+)
 
 
 class TestPromptStagesGenerator:

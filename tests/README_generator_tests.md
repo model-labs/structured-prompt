@@ -105,7 +105,7 @@ PYTHONPATH=src python3 -m pytest tests/ -v
 - Parent-child relationships are accurate
 
 ### 3. Prompt Infrastructure Compatibility
-- Generated stages work seamlessly with `DigmaStructuredPrompt`
+- Generated stages work seamlessly with `StructuredPromptFactory`
 - All acceptance examples render correctly
 - Fixed ordering is respected during rendering
 - Custom indentation preferences work with generated stages

@@ -205,7 +205,35 @@ def emit_wiring(top_nodes: List[Dict[str, Any]]) -> List[str]:
 # ----------------------------
 
 
+class PromptStructureGenerator:
+    """Generator for creating Python stage classes from YAML definitions."""
+
+    def __init__(self, yaml_path: str | Path):
+        """Initialize the generator with a YAML file path.
+
+        Args:
+            yaml_path: Path to the YAML file containing stage definitions
+        """
+        self.yaml_path = Path(yaml_path)
+        if not self.yaml_path.exists():
+            raise FileNotFoundError(f"YAML file not found: {self.yaml_path}")
+
+    def generate(self, output_path: str | Path) -> None:
+        """Generate the Python stage classes file.
+
+        Args:
+            output_path: Path where the generated Python file should be written
+        """
+        generate_stages_module(self.yaml_path, Path(output_path))
+
+
 def generate_stages_module(yaml_path: Path, out_path: Path) -> None:
+    """Generate stages module from YAML definition.
+
+    Args:
+        yaml_path: Path to the YAML file containing stage definitions
+        out_path: Path where the generated Python file should be written
+    """
     model = load_yaml(yaml_path)  # {"stages": [...]}
     top_nodes = model["stages"]
 
