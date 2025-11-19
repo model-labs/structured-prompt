@@ -1,6 +1,6 @@
 import pytest
 
-from builder import StructuredPromptFactory, PromptSection, IndentationPreferences, PromptText
+from src.builder import StructuredPromptFactory, PromptSection, IndentationPreferences, PromptText
 from tests.stubs.prompt_structure import Stages
 
 
@@ -479,6 +479,50 @@ hanging indentation for continuation lines."""
         assert "Item B3" in rendered
         assert "Plain text item" in rendered
         assert "Another main item" in rendered
+
+    def test_deep_stage_assignment_without_parent(self):
+        """Test that assigning a deep stage without explicit parent assignment auto-creates entire hierarchy."""
+        prompt = StructuredPromptFactory()
+
+        # Assign to deep stage without ever assigning to parent Stages.Output
+        prompt[Stages.Output.OutputTemplateRules] = ["New Rule"]
+
+        rendered = prompt.render_prompt()
+
+        # Verify the entire hierarchy is created and shown
+        assert "1. Output" in rendered
+        assert "Output Template Rules" in rendered
+        assert "New Rule" in rendered
+
+        # Verify the structure is properly nested
+        lines = rendered.split("\n")
+        output_line_idx = None
+        template_rules_line_idx = None
+        new_rule_line_idx = None
+
+        for i, line in enumerate(lines):
+            if line.strip().startswith("1. Output"):
+                output_line_idx = i
+            elif "Output Template Rules" in line:
+                template_rules_line_idx = i
+            elif "New Rule" in line:
+                new_rule_line_idx = i
+
+        # Verify all components are found
+        assert output_line_idx is not None, "Output section not found"
+        assert template_rules_line_idx is not None, "Output Template Rules section not found"
+        assert new_rule_line_idx is not None, "New Rule not found"
+
+        # Verify proper nesting order
+        assert output_line_idx < template_rules_line_idx < new_rule_line_idx
+
+        # Verify proper indentation (Output Template Rules should be indented under Output)
+        template_rules_line = lines[template_rules_line_idx]
+        assert template_rules_line.startswith("  -"), f"Expected indented Output Template Rules, got: {template_rules_line}"
+
+        # Verify New Rule is properly indented under Output Template Rules
+        new_rule_line = lines[new_rule_line_idx]
+        assert new_rule_line.startswith("    *"), f"Expected indented New Rule, got: {new_rule_line}"
 
 
 if __name__ == "__main__":

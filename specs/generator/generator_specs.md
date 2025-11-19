@@ -71,7 +71,7 @@ Stages.__fixed_top_order__ = (Stages.ToolReference,)
 	•	Dual identity (display vs key)
 		Keeps the human-friendly label and a robust lowercased programmatic key.
 	•	Embedded metadata
-		DigmaStructuredPrompt doesn’t need to be “injected” with a root; all info lives in the generated classes.
+		StructuredPromptFactory doesn’t need to be “injected” with a root; all info lives in the generated classes.
 	•	Fixed ordering only where needed
 		Most sections should remain flexible; pin only those that must be in a fixed position.
 
@@ -94,7 +94,7 @@ Top-level ordering
 	•	All non-fixed top-level sections preserve append/insertion order.
 	•	The generator also provides Stages.__top_levels__ and Stages.__fixed_top_order__ to make this cheap to compute without scanning class dicts.
 
-Interop with DigmaStructuredPrompt
+Interop with StructuredPromptFactory
 	•	Users can assign with either the stage class or strings interchangeably:
 
 prompt[Stages.ToolReference] = PromptSection(…)       # replace semantics
