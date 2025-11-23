@@ -155,10 +155,14 @@ class StructuredPromptFactory(PromptSection):
 
         return ordered
 
+    def set_role(self, role: str) -> None:
+        """Set the role field that will be rendered before the rest of the prompt as **Role**."""
+        self.role = role
+
     def render_prompt(self) -> str:
         parts: List[str] = []
         if self.role:
-            parts.append(self.role.strip())
+            parts.append(f"**{self.role.strip()}**")
             parts.append("")
 
         if self.prologue:

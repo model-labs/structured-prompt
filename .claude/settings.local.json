@@ -8,7 +8,8 @@
       "Bash($HOME/Library/Python/3.13/bin/structured-prompt:*)",
       "Bash(python3:*)",
       "Bash(cat:*)",
-      "Bash($HOME/Library/Python/3.13/bin/ruff check src/)"
+      "Bash($HOME/Library/Python/3.13/bin/ruff check src/)",
+      "Bash(ruff check:*)"
     ],
     "deny": [],
     "ask": []

@@ -434,6 +434,49 @@ hanging indentation for continuation lines."""
         # Should render just the prologue
         assert rendered.strip() == "Test Prologue"
 
+    def test_set_role_function(self):
+        """Test that set_role sets the role field and renders it as **Role**."""
+        prompt = StructuredPromptFactory(stage_root=Stages)
+
+        # Set the role using set_role function
+        prompt.set_role("You are a helpful assistant")
+
+        # Add some content
+        prompt[Stages.Objective] = ["Test objective"]
+
+        rendered = prompt.render_prompt()
+
+        # Verify role is rendered with ** formatting before everything else
+        assert "**You are a helpful assistant**" in rendered
+
+        # Verify it appears before the first section
+        role_idx = rendered.index("**You are a helpful assistant**")
+        objective_idx = rendered.index("1. Objective")
+        assert role_idx < objective_idx
+
+    def test_role_with_prologue_and_critical_steps(self):
+        """Test that role appears before prologue and critical steps."""
+        prompt = StructuredPromptFactory(prologue="Test Prologue", stage_root=Stages)
+
+        # Set role
+        prompt.set_role("Senior Engineer")
+
+        # Add critical step
+        prompt.add_critical_step("VERIFY", "Always verify assumptions")
+
+        # Add content
+        prompt[Stages.Objective] = ["Complete the task"]
+
+        rendered = prompt.render_prompt()
+
+        # Verify order: role, then prologue, then critical step, then sections
+        role_idx = rendered.index("**Senior Engineer**")
+        prologue_idx = rendered.index("Test Prologue")
+        critical_idx = rendered.index("!!! MANDATORY STEP [VERIFY] !!!")
+        objective_idx = rendered.index("1. Objective")
+
+        assert role_idx < prologue_idx < critical_idx < objective_idx
+
     def test_prompt_with_only_critical_steps(self):
         """Test prompt with only critical steps and no sections."""
         prompt = StructuredPromptFactory(prologue="Test", stage_root=Stages)
