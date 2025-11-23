@@ -128,7 +128,7 @@ class TestGeneratedStagesIntegration:
 
     def test_acceptance_example_1_append_array_value(self):
         """Test acceptance example 1: Append when setting array value."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         # First assignment
         prompt[self.Stages.AdaptiveExecution] = [
@@ -166,7 +166,7 @@ class TestGeneratedStagesIntegration:
 
     def test_acceptance_example_2_replace_prompt_section(self):
         """Test acceptance example 2: Replace when setting PromptSection object."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         # First assignment
         prompt[self.Stages.QualityGates] = [
@@ -201,7 +201,7 @@ class TestGeneratedStagesIntegration:
 
     def test_acceptance_example_3_append_string_value(self):
         """Test acceptance example 3: Append when setting string value."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         prompt[self.Stages.Output][self.Stages.Output.OutputTemplateRules] = [
             "Always format answers using valid Markdown.",
@@ -220,7 +220,7 @@ class TestGeneratedStagesIntegration:
 
     def test_acceptance_example_4_key_from_dictionary_key(self):
         """Test acceptance example 4: Take key value from dictionary key."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         prompt[self.Stages.Output][self.Stages.Output.OutputTemplate] = [
             "Incident Scope",
@@ -237,7 +237,7 @@ class TestGeneratedStagesIntegration:
 
     def test_acceptance_example_5_hierarchical_addressing(self):
         """Test acceptance example 5: Hierarchical addressing with and without explicit parent."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         # Direct deep reference
         prompt[self.Stages.Output.OutputTemplateRules] = ["Always format answers using valid Markdown."]
@@ -255,7 +255,7 @@ class TestGeneratedStagesIntegration:
 
     def test_acceptance_example_6_nested_sections(self):
         """Test acceptance example 6: Nested sections created with PromptSection value."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         # Check if SpecialCases exists, if not skip this test
         if not hasattr(self.Stages.AdaptiveExecution, "SpecialCases"):
@@ -331,7 +331,7 @@ class TestGeneratedStagesIntegration:
             assert hasattr(ActualStages, "QualityGates")
 
             # Test that we can create a prompt with the generated stages
-            prompt = StructuredPromptFactory()
+            prompt = StructuredPromptFactory(stage_root=self.Stages)
 
             # Add some content to various stages
             prompt[ActualStages.Objective] = "Investigate and resolve the production incident"
@@ -367,7 +367,7 @@ class TestGeneratedStagesIntegration:
 
     def test_acceptance_example_7_bullet_style_control(self):
         """Test acceptance example 7: Bullet style control - no bullets for children."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         prompt[self.Stages.ToolReference] = PromptSection(
             bullet_style=None,  # suppress bullets for children
@@ -392,7 +392,7 @@ class TestGeneratedStagesIntegration:
 
     def test_acceptance_example_8_fixed_top_level_ordering(self):
         """Test acceptance example 8: Fixed top-level ordering."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         # Order of assignments is intentionally shuffled
         prompt[self.Stages.Planning] = ["Plan step A"]
@@ -415,25 +415,26 @@ class TestGeneratedStagesIntegration:
                 planning_idx = i
             elif line.strip().startswith("2. Quality Gates"):
                 quality_gates_idx = i
-            elif line.strip().startswith("3. Tool Reference"):
-                tool_reference_idx = i
-            elif line.strip().startswith("4. Scoping"):
+            elif line.strip().startswith("3. Scoping"):
                 scoping_idx = i
+            elif line.strip().startswith("4. Tool Reference"):
+                tool_reference_idx = i
 
         # Verify all sections are found
         assert planning_idx is not None, f"Planning not found in rendered output: {rendered}"
         assert quality_gates_idx is not None, f"Quality Gates not found in rendered output: {rendered}"
-        assert tool_reference_idx is not None, f"Tool Reference not found in rendered output: {rendered}"
         assert scoping_idx is not None, f"Scoping not found in rendered output: {rendered}"
+        assert tool_reference_idx is not None, f"Tool Reference not found in rendered output: {rendered}"
 
-        # Verify sections appear in insertion order
+        # Verify sections appear in correct order
+        # Tool Reference has fixed order_index=3 (0-based), so it appears at position 4 (1-indexed display)
         assert planning_idx < quality_gates_idx
-        assert quality_gates_idx < tool_reference_idx
-        assert tool_reference_idx < scoping_idx
+        assert quality_gates_idx < scoping_idx
+        assert scoping_idx < tool_reference_idx
 
     def test_acceptance_example_9_critical_steps(self):
         """Test acceptance example 9: Critical steps (section-level and root-level)."""
-        prompt = StructuredPromptFactory(prologue="K8s Resolver Prompt")
+        prompt = StructuredPromptFactory(prologue="K8s Resolver Prompt", stage_root=self.Stages)
 
         # Root-level critical step
         prompt.add_critical_step("CHECK OTHER NAMESPACES AND FLAGS", "Explore other namespaces and compare configs.")
@@ -459,7 +460,7 @@ class TestGeneratedStagesIntegration:
 
     def test_acceptance_example_10_mixing_content_types(self):
         """Test acceptance example 10: Mixing PromptText, str, and nested sections."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         prompt[self.Stages.Output] = [
             PromptText("Use Markdown throughout."),
@@ -536,7 +537,7 @@ class TestGeneratedStagesIntegration:
             blank_line_between_top=True,
         )
 
-        prompt = StructuredPromptFactory(prefs=custom_prefs)
+        prompt = StructuredPromptFactory(prefs=custom_prefs, stage_root=self.Stages)
 
         prompt[self.Stages.Output] = ["Main output rule", PromptSection("Template", items=["Section 1", "Section 2"])]
 
@@ -551,7 +552,7 @@ class TestGeneratedStagesIntegration:
 
     def test_generated_stages_arbitrary_children(self):
         """Test that generated stages can have arbitrary children added."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=self.Stages)
 
         # Add arbitrary child under a generated stage
         prompt[self.Stages.Output]["Developer Handoff Notes"] = [

@@ -9,7 +9,7 @@ class TestDynamicPromptBuilder:
 
     def test_1_append_when_setting_array_value(self):
         """Test that assigning a List[ItemLike] to a section appends items."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         # First assignment
         prompt[Stages.AdaptiveExecution] = [
@@ -45,7 +45,7 @@ class TestDynamicPromptBuilder:
 
     def test_2_replace_when_setting_prompt_section_object(self):
         """Test that assigning a PromptSection directly replaces that section."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         # First assignment
         prompt[Stages.QualityGates] = [
@@ -79,7 +79,7 @@ class TestDynamicPromptBuilder:
 
     def test_3_append_when_setting_string_value(self):
         """Test that assigning a plain str to a stage key appends it as PromptText."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         prompt[Stages.Output][Stages.Output.OutputTemplateRules] = [
             "Always format answers using valid Markdown.",
@@ -98,7 +98,7 @@ class TestDynamicPromptBuilder:
 
     def test_4_take_key_value_from_dictionary_key(self):
         """Test that section key is derived from dictionary key and title from display."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         prompt[Stages.Output][Stages.Output.OutputTemplate] = [
             "Incident Scope",
@@ -115,7 +115,7 @@ class TestDynamicPromptBuilder:
 
     def test_5_hierarchical_addressing_with_and_without_explicit_parent(self):
         """Test that deep stage references auto-create ancestors."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         # Direct deep reference
         prompt[Stages.Output.OutputTemplateRules] = ["Always format answers using valid Markdown."]
@@ -133,7 +133,7 @@ class TestDynamicPromptBuilder:
 
     def test_6_nested_sections_created_with_prompt_section_value(self):
         """Test that PromptSection allows embedding subsections in one shot."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         prompt[Stages.AdaptiveExecution] = [
             PromptSection(
@@ -168,7 +168,7 @@ class TestDynamicPromptBuilder:
 
     def test_7_bullet_style_control_no_bullets_for_children(self):
         """Test that bullet_style=None suppresses bullets for children while maintaining indentation."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         prompt[Stages.ToolReference] = PromptSection(
             bullet_style=None,  # suppress bullets for children
@@ -193,7 +193,7 @@ class TestDynamicPromptBuilder:
 
     def test_8_fixed_top_level_ordering(self):
         """Test that fixed-order top-level stages render in canonical order regardless of assignment time."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         # Order of assignments is intentionally shuffled
         prompt[Stages.Planning] = ["Plan step A"]
@@ -216,10 +216,10 @@ class TestDynamicPromptBuilder:
                 planning_idx = i
             elif line.strip().startswith("2. Quality Gates"):
                 quality_gates_idx = i
-            elif line.strip().startswith("3. Tool Reference"):
-                tool_reference_idx = i
-            elif line.strip().startswith("4. Scoping"):
+            elif line.strip().startswith("3. Scoping"):
                 scoping_idx = i
+            elif line.strip().startswith("4. Tool Reference"):
+                tool_reference_idx = i
 
         # Verify all sections are found
         assert planning_idx is not None, "Planning section not found"
@@ -227,15 +227,16 @@ class TestDynamicPromptBuilder:
         assert tool_reference_idx is not None, "Tool Reference section not found"
         assert scoping_idx is not None, "Scoping section not found"
 
-        # Verify the order matches the insertion order
-        # The order should be: Planning (1), Quality Gates (2), Tool Reference (3), Scoping (4)
+        # Verify the order matches expectations
+        # Tool Reference has fixed order_index=3 (0-based), so it appears at position 4 (1-indexed display)
+        # The order should be: Planning (1), Quality Gates (2), Scoping (3), Tool Reference (4)
         assert planning_idx < quality_gates_idx
-        assert quality_gates_idx < tool_reference_idx
-        assert tool_reference_idx < scoping_idx
+        assert quality_gates_idx < scoping_idx
+        assert scoping_idx < tool_reference_idx
 
     def test_9_critical_steps_section_level_and_root_level(self):
         """Test that add_critical_step renders mandatory blocks at section and root levels."""
-        prompt = StructuredPromptFactory(prologue="K8s Resolver Prompt")
+        prompt = StructuredPromptFactory(prologue="K8s Resolver Prompt", stage_root=Stages)
 
         # Root-level critical step
         prompt.add_critical_step("CHECK OTHER NAMESPACES AND FLAGS", "Explore other namespaces and compare configs.")
@@ -261,7 +262,7 @@ class TestDynamicPromptBuilder:
 
     def test_10_mixing_prompt_text_str_and_nested_sections(self):
         """Test that any ItemLike is acceptable: PromptText, plain strings, or nested PromptSection objects."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         prompt[Stages.Output] = [
             PromptText("Use Markdown throughout."),
@@ -288,7 +289,7 @@ class TestDynamicPromptBuilder:
             blank_line_between_top=True,
         )
 
-        prompt = StructuredPromptFactory(prefs=custom_prefs)
+        prompt = StructuredPromptFactory(prefs=custom_prefs, stage_root=Stages)
 
         prompt[Stages.Output] = ["Main output rule", PromptSection("Template", items=["Section 1", "Section 2"])]
 
@@ -304,7 +305,7 @@ class TestDynamicPromptBuilder:
     def test_blank_line_between_top_preference(self):
         """Test blank_line_between_top preference."""
         # Test with blank lines between top sections
-        prompt_with_blanks = StructuredPromptFactory()
+        prompt_with_blanks = StructuredPromptFactory(stage_root=Stages)
         prompt_with_blanks.prefs.blank_line_between_top = True
 
         prompt_with_blanks[Stages.Output] = ["Test output"]
@@ -313,7 +314,7 @@ class TestDynamicPromptBuilder:
         rendered_with_blanks = prompt_with_blanks.render_prompt()
 
         # Test without blank lines between top sections
-        prompt_without_blanks = StructuredPromptFactory()
+        prompt_without_blanks = StructuredPromptFactory(stage_root=Stages)
         prompt_without_blanks.prefs.blank_line_between_top = False
 
         prompt_without_blanks[Stages.Output] = ["Test output"]
@@ -326,7 +327,7 @@ class TestDynamicPromptBuilder:
 
     def test_arbitrary_stage_names(self):
         """Test that arbitrary stage names can be used alongside canonical stages."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         # Use canonical stage
         prompt[Stages.Output] = ["Canonical content"]
@@ -344,7 +345,7 @@ class TestDynamicPromptBuilder:
 
     def test_nested_arbitrary_stages(self):
         """Test nested arbitrary stages."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         prompt["MainStage"] = [PromptSection("SubStage", items=["Sub content"]), "Main content"]
 
@@ -358,7 +359,7 @@ class TestDynamicPromptBuilder:
 
     def test_stage_root_inheritance(self):
         """Test that nested sections inherit stage_root from parent."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         # Create a nested section that should inherit stage_root
         nested_section = PromptSection("Nested", items=["Nested content"])
@@ -371,7 +372,7 @@ class TestDynamicPromptBuilder:
 
     def test_multiline_text_rendering(self):
         """Test that multiline text is rendered with proper hanging indentation."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         multiline_text = """This is a multiline text
 that should be rendered with proper
@@ -417,7 +418,7 @@ hanging indentation for continuation lines."""
 
     def test_empty_prompt_rendering(self):
         """Test that an empty prompt renders correctly."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         rendered = prompt.render_prompt()
 
@@ -426,7 +427,7 @@ hanging indentation for continuation lines."""
 
     def test_prompt_with_only_prologue(self):
         """Test prompt with only prologue text."""
-        prompt = StructuredPromptFactory(prologue="Test Prologue")
+        prompt = StructuredPromptFactory(prologue="Test Prologue", stage_root=Stages)
 
         rendered = prompt.render_prompt()
 
@@ -435,7 +436,7 @@ hanging indentation for continuation lines."""
 
     def test_prompt_with_only_critical_steps(self):
         """Test prompt with only critical steps and no sections."""
-        prompt = StructuredPromptFactory(prologue="Test")
+        prompt = StructuredPromptFactory(prologue="Test", stage_root=Stages)
         prompt.add_critical_step("CRITICAL", "This is critical")
 
         rendered = prompt.render_prompt()
@@ -448,7 +449,7 @@ hanging indentation for continuation lines."""
 
     def test_complex_nested_structure(self):
         """Test a complex nested structure to ensure proper rendering."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         prompt[Stages.Output] = [
             PromptSection(
@@ -479,7 +480,7 @@ hanging indentation for continuation lines."""
 
     def test_deep_stage_assignment_without_parent(self):
         """Test that assigning a deep stage without explicit parent assignment auto-creates entire hierarchy."""
-        prompt = StructuredPromptFactory()
+        prompt = StructuredPromptFactory(stage_root=Stages)
 
         # Assign to deep stage without ever assigning to parent Stages.Output
         prompt[Stages.Output.OutputTemplateRules] = ["New Rule"]

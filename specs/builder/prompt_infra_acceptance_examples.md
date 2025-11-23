@@ -5,7 +5,7 @@ This document demonstrates **example usage** of the prompt framework and the **e
 Each example highlights a **principle** of the system.
 
 > Note: Examples assume:
-> - `from dynamic_prompt.dynamic_prompt_builder import DigmaStructuredPrompt, PromptSection, PromptText`
+> - `from dynamic_prompt.dynamic_prompt_builder import StructuredPromptFactory, PromptSection, PromptText`
 > - `from hyper_reasoning.prompts.prompt_stages import Stages`
 > - Default `IndentationPreferences`: top-level: `1., 2., 3.`, children: `-`, then `*`, then `a.`
 > - `blank_line_between_top = True`
@@ -17,7 +17,7 @@ Each example highlights a **principle** of the system.
 
 **Code**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 prompt[Stages.AdaptiveExecution] = [
     PromptSection(
@@ -58,7 +58,7 @@ The **key** is taken from the dictionary key; the `PromptSection.title` is kept 
 
 **Code**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 # First assignment:
 prompt[Stages.QualityGates] = [
@@ -89,7 +89,7 @@ prompt[Stages.QualityGates] = PromptSection(
 
 **Code**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 prompt[Stages.Output][Stages.Output.OutputTemplateRules] = [
     "Always format answers using valid Markdown.",
@@ -115,7 +115,7 @@ prompt[Stages.Output][Stages.Output.OutputTemplateRules] = "Use headings (#, ##,
 
 **Code**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 prompt[Stages.Output][Stages.Output.OutputTemplate] = [
     "Incident Scope",
@@ -140,7 +140,7 @@ prompt[Stages.Output][Stages.Output.OutputTemplate] = [
 
 **Code**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 # Direct deep reference:
 prompt[Stages.Output.OutputTemplateRules] = ["Always format answers using valid Markdown."]
@@ -164,7 +164,7 @@ prompt[Stages.Output][Stages.Output.OutputTemplateRules] = ["Use headings (#, ##
 
 **Code**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 prompt[Stages.AdaptiveExecution] = [
     PromptSection(
@@ -204,7 +204,7 @@ prompt[Stages.AdaptiveExecution] = [
 
 **Code**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 prompt[Stages.ToolReference] = PromptSection(
     bullet_style=None,  # suppress bullets for children
@@ -232,7 +232,7 @@ prompt[Stages.ToolReference] = PromptSection(
 
 **Code (order of assignments is intentionally shuffled)**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 prompt[Stages.Planning] = ["Plan step A"]
 prompt[Stages.QualityGates] = ["Gate A"]
@@ -260,7 +260,7 @@ If added to the root prompt, it renders **after the prologue and before the firs
 
 **Code**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages, prologue="K8s Resolver Prompt")
+prompt = StructuredPromptFactory(stage_root=Stages, prologue="K8s Resolver Prompt")
 
 # Root-level critical step
 prompt.add_critical_step("CHECK OTHER NAMESPACES AND FLAGS", "Explore other namespaces and compare configs.")
@@ -292,7 +292,7 @@ Explore other namespaces and compare configs.
 
 **Code**
 ```python
-prompt = DigmaStructuredPrompt(stage_root=Stages)
+prompt = StructuredPromptFactory(stage_root=Stages)
 
 prompt[Stages.Output] = [
     PromptText("Use Markdown throughout."),

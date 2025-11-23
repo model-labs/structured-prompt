@@ -13,6 +13,7 @@ from .sections import PromptSection
 class StructuredPromptFactory(PromptSection):
     prefs: IndentationPreferences = field(default_factory=IndentationPreferences)
     prologue: Optional[str] = None
+    role: Optional[str] = None
     stage_root: Optional[type] = None
 
     _top_order_map: Dict[str, Tuple[int, bool]] = field(init=False, default_factory=dict)
@@ -22,20 +23,48 @@ class StructuredPromptFactory(PromptSection):
         self,
         prefs: Optional[IndentationPreferences] = None,
         prologue: Optional[str] = None,
+        role: Optional[str] = None,
         items: Optional[Sequence[Union[Item, str]]] = None,
         title: str = "ROOT",
+        stage_root: Optional[type] = None,
     ):
         super().__init__(name=title, items=items, title=title)
         self.prefs = prefs or IndentationPreferences()
         self.prologue = prologue
+        self.role = role
+        self.stage_root = stage_root
 
         self._top_order_map = {}
-        Stages, topo = _try_import_generated_stages()
-        self._stage_root = Stages
-        self._stage_root_name = getattr(Stages, "__name__", "") if Stages else ""
 
-        self._top_order_map.update(topo)
+        # If stage_root is provided, build the top_order_map from it
+        if stage_root is not None:
+            self._stage_root = stage_root
+            self._stage_root_name = getattr(stage_root, "__name__", "")
+            self._top_order_map.update(self._build_top_order_map_from_stages(stage_root))
+        else:
+            # Fallback to trying to import generated stages if no stage_root provided
+            Stages, topo = _try_import_generated_stages()
+            self._stage_root = Stages
+            self._stage_root_name = getattr(Stages, "__name__", "") if Stages else ""
+            self._top_order_map.update(topo)
+
         self._insertion_seq_counter = 0
+
+    def _build_top_order_map_from_stages(self, stages_root: type) -> Dict[str, Tuple[int, bool]]:
+        """Build top_order_map from a Stages class with stage definitions."""
+        top_map: Dict[str, Tuple[int, bool]] = {}
+
+        for idx, (nm, obj) in enumerate(stages_root.__dict__.items()):
+            if isinstance(obj, type) and hasattr(obj, "__stage_display__"):
+                fixed = bool(getattr(obj, "__order_fixed__", False))
+                order_index = int(getattr(obj, "__order_index__", idx))
+                class_key = nm.strip().lower()
+                display = getattr(obj, "__stage_display__", nm)
+                display_key = display.strip().lower()
+                for k in set(_key_variants(class_key) + _key_variants(display_key)):
+                    top_map[k] = (order_index, fixed)
+
+        return top_map
 
     def _register_top_stage_from_class(self, cls: type, section: PromptSection) -> None:
         if not _is_stage_class(cls):
@@ -128,6 +157,10 @@ class StructuredPromptFactory(PromptSection):
 
     def render_prompt(self) -> str:
         parts: List[str] = []
+        if self.role:
+            parts.append(self.role.strip())
+            parts.append("")
+
         if self.prologue:
             parts.append(self.prologue.strip())
             parts.append("")
