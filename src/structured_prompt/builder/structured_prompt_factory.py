@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Tuple, Union
 
@@ -157,7 +158,7 @@ class StructuredPromptFactory(PromptSection):
 
     def set_role(self, role: str) -> None:
         """Set the role field that will be rendered before the rest of the prompt as **Role**."""
-        self.role = role
+        self.role = inspect.cleandoc(role)
 
     def render_prompt(self) -> str:
         parts: List[str] = []
