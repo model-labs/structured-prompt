@@ -558,12 +558,142 @@ hanging indentation for continuation lines."""
         assert output_line_idx < template_rules_line_idx < new_rule_line_idx
 
         # Verify proper indentation (Output Template Rules should be indented under Output)
+        # NOTE: Single items don't get bullets with new behavior
         template_rules_line = lines[template_rules_line_idx]
-        assert template_rules_line.startswith("  -"), f"Expected indented Output Template Rules, got: {template_rules_line}"
+        assert template_rules_line.startswith("  "), f"Expected indented Output Template Rules, got: {template_rules_line}"
+        assert template_rules_line.strip() == "Output Template Rules", f"Expected just section name, got: {template_rules_line}"
 
         # Verify New Rule is properly indented under Output Template Rules
+        # NOTE: Single items don't get bullets with new behavior
         new_rule_line = lines[new_rule_line_idx]
-        assert new_rule_line.startswith("    *"), f"Expected indented New Rule, got: {new_rule_line}"
+        assert new_rule_line.startswith("    "), f"Expected indented New Rule, got: {new_rule_line}"
+        assert new_rule_line.strip() == "New Rule", f"Expected just content, got: {new_rule_line}"
+
+    def test_single_item_no_bullets_behavior(self):
+        """Test that single items don't get bullets but multiple items do."""
+        prompt = StructuredPromptFactory(stage_root=Stages)
+
+        # Test single item case - should not have bullet
+        prompt[Stages.Objective] = ["Single item only"]
+        rendered_single = prompt.render_prompt()
+
+        # Verify single item has no bullet but proper indentation
+        assert "1. Objective" in rendered_single
+        assert "Single item only" in rendered_single
+        assert "- Single item only" not in rendered_single, "Single item should not have bullet"
+        assert "* Single item only" not in rendered_single, "Single item should not have bullet"
+
+        # Find the content line and verify indentation without bullet
+        lines = rendered_single.split('\n')
+        content_line = None
+        for line in lines:
+            if "Single item only" in line:
+                content_line = line
+                break
+
+        assert content_line is not None, "Content line not found"
+        stripped = content_line.lstrip()
+        leading_spaces = len(content_line) - len(stripped)
+        assert leading_spaces > 0, "Should have indentation"
+        assert stripped == "Single item only", "Content should be plain text without bullet"
+
+        # Test multiple items case - should have bullets
+        prompt2 = StructuredPromptFactory(stage_root=Stages)
+        prompt2[Stages.Objective] = ["First item", "Second item"]
+        rendered_multiple = prompt2.render_prompt()
+
+        assert "1. Objective" in rendered_multiple
+        assert "- First item" in rendered_multiple, "Multiple items should have bullets"
+        assert "- Second item" in rendered_multiple, "Multiple items should have bullets"
+
+        # Test appending behavior - single becomes multiple
+        prompt3 = StructuredPromptFactory(stage_root=Stages)
+        prompt3[Stages.Planning] = ["Initial step"]
+        rendered_before = prompt3.render_prompt()
+
+        # Should not have bullet initially
+        assert "Initial step" in rendered_before
+        assert "- Initial step" not in rendered_before, "Single item should not have bullet initially"
+
+        # Append second item
+        prompt3[Stages.Planning] = ["Second step"]
+        rendered_after = prompt3.render_prompt()
+
+        # Now both should have bullets
+        assert "- Initial step" in rendered_after, "First item should have bullet after append"
+        assert "- Second step" in rendered_after, "Second item should have bullet after append"
+
+    def test_single_item_with_bullet_style_none_override(self):
+        """Test that bullet_style=None overrides single item behavior (both result in no bullets)."""
+        prompt = StructuredPromptFactory(stage_root=Stages)
+
+        # Single item with explicit bullet_style=None
+        prompt[Stages.ToolReference] = PromptSection(
+            bullet_style=None,
+            items=["Single item with explicit None"]
+        )
+
+        rendered = prompt.render_prompt()
+
+        # Should have no bullet (consistent with bullet_style=None behavior)
+        assert "1. Tool Reference" in rendered
+        assert "Single item with explicit None" in rendered
+        assert "- Single item with explicit None" not in rendered, "bullet_style=None should suppress bullets"
+        assert "* Single item with explicit None" not in rendered, "bullet_style=None should suppress bullets"
+
+        # Multiple items with bullet_style=None should also have no bullets
+        prompt2 = StructuredPromptFactory(stage_root=Stages)
+        prompt2[Stages.ToolReference] = PromptSection(
+            bullet_style=None,
+            items=["Item 1", "Item 2"]
+        )
+
+        rendered2 = prompt2.render_prompt()
+        assert "Item 1" in rendered2
+        assert "Item 2" in rendered2
+        assert "- Item 1" not in rendered2, "bullet_style=None should suppress bullets for multiple items"
+        assert "- Item 2" not in rendered2, "bullet_style=None should suppress bullets for multiple items"
+
+    def test_nested_single_item_behavior(self):
+        """Test single item behavior in nested sections."""
+        prompt = StructuredPromptFactory(stage_root=Stages)
+
+        prompt[Stages.Planning] = [
+            PromptSection("Single Item Section", items=["Only one item"]),
+            PromptSection("Multi Item Section", items=["Item A", "Item B"])
+        ]
+
+        rendered = prompt.render_prompt()
+
+        # Verify nested structure
+        assert "1. Planning" in rendered
+        assert "Single Item Section" in rendered
+        assert "Multi Item Section" in rendered
+
+        lines = rendered.split('\n')
+        found_single_content = False
+        found_multi_content_a = False
+        found_multi_content_b = False
+
+        for line in lines:
+            if "Only one item" in line:
+                # Single item should not have bullet
+                stripped = line.lstrip()
+                assert not stripped.startswith('-'), f"Single nested item should not have bullet: {line}"
+                assert not stripped.startswith('*'), f"Single nested item should not have bullet: {line}"
+                assert stripped == "Only one item", f"Content should be plain text: {line}"
+                found_single_content = True
+            elif "Item A" in line:
+                # Multiple items should have bullets
+                assert "* Item A" in line, f"Multi items should have bullets: {line}"
+                found_multi_content_a = True
+            elif "Item B" in line:
+                assert "* Item B" in line, f"Multi items should have bullets: {line}"
+                found_multi_content_b = True
+
+        assert found_single_content, "Single item content not found"
+        assert found_multi_content_a, "Multi item A content not found"
+        assert found_multi_content_b, "Multi item B content not found"
 
 
 if __name__ == "__main__":

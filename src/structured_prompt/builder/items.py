@@ -34,9 +34,10 @@ class PromptText(Item):
     ) -> str:
         if ignore_bullets:
             left = " " * (prefs.spaces_per_level * level)
+            hang = " " * (prefs.spaces_per_level * level + 2)  # 2 spaces for hanging indent
             lines = self.text.strip().splitlines() or [""]
             out = [left + lines[0]]
-            out += [left + ln.strip() for ln in lines[1:]]
+            out += [hang + ln.strip() for ln in lines[1:]]
             return "\n".join(out)
 
         cur_style = prefs.next_style(prev_style)

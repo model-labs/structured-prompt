@@ -297,7 +297,7 @@ class PromptSection(Item):
             lines.append(hang + self.subtitle)
 
         next_level = level + 1
-        children_ignore = self.bullet_style is None
+        children_ignore = self.bullet_style is None or len(self.items) == 1
 
         for i, child in enumerate(self.items, 1):
             lines.append(
