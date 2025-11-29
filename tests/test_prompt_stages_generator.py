@@ -1,19 +1,18 @@
 import tempfile
 from pathlib import Path
-from unittest.mock import patch, mock_open
 
 import pytest
 
 from structured_prompt.generator.prompt_structure_generator import (
-    load_yaml,
     _normalize_mapping_to_nodes,
     _normalize_node,
-    to_identifier,
-    emit_class_tree,
-    qname,
     collect_paths,
+    emit_class_tree,
     emit_wiring,
     generate_stages_module,
+    load_yaml,
+    qname,
+    to_identifier,
 )
 
 
@@ -28,32 +27,32 @@ class TestPromptStagesGenerator:
         Global Rules:
             __doc__: "Declares top-level constraints."
         """
-        
+
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write(yaml_content)
             f.flush()
-            
+
             result = load_yaml(Path(f.name))
-            
+
             assert "stages" in result
             assert len(result["stages"]) == 2
             assert result["stages"][0]["display"] == "Objective"
             assert result["stages"][1]["display"] == "Global Rules"
-            
+
             # Cleanup
             Path(f.name).unlink()
 
     def test_load_yaml_invalid_top_level(self):
         """Test loading invalid YAML (not a mapping at top level)."""
         yaml_content = "Objective: some string"
-        
+
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write(yaml_content)
             f.flush()
-            
+
             with pytest.raises(ValueError, match="Stage 'Objective' must be a mapping or null"):
                 load_yaml(Path(f.name))
-            
+
             # Cleanup
             Path(f.name).unlink()
 
@@ -62,14 +61,14 @@ class TestPromptStagesGenerator:
         yaml_content = """
         Objective: "not a mapping"
         """
-        
+
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write(yaml_content)
             f.flush()
-            
+
             with pytest.raises(ValueError, match="Stage 'Objective' must be a mapping or null"):
                 load_yaml(Path(f.name))
-            
+
             # Cleanup
             Path(f.name).unlink()
 
@@ -87,16 +86,16 @@ class TestPromptStagesGenerator:
                 "order_index": 1
             }
         }
-        
+
         result = _normalize_mapping_to_nodes(yaml_data)
-        
+
         assert len(result) == 2
         assert result[0]["display"] == "Objective"
         assert result[0]["class"] == "Objective"
         assert result[0]["doc"] == "Defines the mission."
         assert result[0]["order_fixed"] is False
         assert result[0]["order_index"] == 0
-        
+
         assert result[1]["display"] == "Global Rules"
         assert result[1]["class"] == "GlobalRules"
         assert result[1]["doc"] == "Declares constraints."
@@ -113,9 +112,9 @@ class TestPromptStagesGenerator:
                 "__doc__": "Child description"
             }
         }
-        
+
         result = _normalize_node("Parent Stage", node_data, 0)
-        
+
         assert result["display"] == "Parent Stage"
         assert result["class"] == "ParentStage"
         assert result["doc"] == "Parent stage"
@@ -175,9 +174,9 @@ class TestPromptStagesGenerator:
                 "children": []
             }
         ]
-        
+
         result = emit_class_tree(nodes)
-        
+
         # Check that the output contains expected class definition
         output = "\n".join(result)
         assert "class Objective:" in output
@@ -206,14 +205,14 @@ class TestPromptStagesGenerator:
                 ]
             }
         ]
-        
+
         result = emit_class_tree(nodes)
         output = "\n".join(result)
-        
+
         # Check parent class
         assert "class Parent:" in output
         assert '""" Parent description """' in output
-        
+
         # Check child class (should be indented)
         assert "    class Child:" in output
         assert '        """ Child description """' in output
@@ -230,9 +229,9 @@ class TestPromptStagesGenerator:
                 "children": []
             }
         ]
-        
+
         result = collect_paths(nodes)
-        
+
         assert len(result) == 1
         path, node = result[0]
         assert path == ["Stages", "Objective"]
@@ -259,16 +258,16 @@ class TestPromptStagesGenerator:
                 ]
             }
         ]
-        
+
         result = collect_paths(nodes)
-        
+
         assert len(result) == 2
-        
+
         # Check parent path
         parent_path, parent_node = result[0]
         assert parent_path == ["Stages", "Parent"]
         assert parent_node["class"] == "Parent"
-        
+
         # Check child path
         child_path, child_node = result[1]
         assert child_path == ["Stages", "Parent", "Child"]
@@ -286,19 +285,19 @@ class TestPromptStagesGenerator:
                 "children": []
             }
         ]
-        
+
         result = emit_wiring(nodes)
         output = "\n".join(result)
-        
+
         # Check stage root and parent
         assert "Stages.Objective.__stage_root__ = Stages" in output
         assert "Stages.Objective.__stage_parent__ = Stages" in output
         assert "Stages.Objective.__children__ = ()" in output
-        
+
         # Check order metadata
         assert "Stages.Objective.__order_fixed__ = False" in output
         assert "Stages.Objective.__order_index__ = 0" in output
-        
+
         # Check top-level collections
         assert "Stages.__top_levels__ = (Stages.Objective,)" in output
         # The empty tuple is formatted as (,)
@@ -324,14 +323,14 @@ class TestPromptStagesGenerator:
                 "children": []
             }
         ]
-        
+
         result = emit_wiring(nodes)
         output = "\n".join(result)
-        
+
         # Check fixed order stage
         assert "Stages.ToolReference.__order_fixed__ = True" in output
         assert "Stages.ToolReference.__order_index__ = 3" in output
-        
+
         # Check top-level collections
         assert "Stages.__top_levels__ = (Stages.Objective, Stages.ToolReference,)" in output
         assert "Stages.__fixed_top_order__ = (Stages.ToolReference,)" in output
@@ -357,15 +356,15 @@ class TestPromptStagesGenerator:
                 ]
             }
         ]
-        
+
         result = emit_wiring(nodes)
         output = "\n".join(result)
-        
+
         # Check parent wiring
         assert "Stages.Parent.__stage_root__ = Stages" in output
         assert "Stages.Parent.__stage_parent__ = Stages" in output
         assert "Stages.Parent.__children__ = (Stages.Parent.Child,)" in output
-        
+
         # Check child wiring
         assert "Stages.Parent.Child.__stage_root__ = Stages" in output
         assert "Stages.Parent.Child.__stage_parent__ = Stages.Parent" in output
@@ -381,21 +380,21 @@ class TestPromptStagesGenerator:
             order: fixed
             order_index: 1
         """
-        
+
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as yaml_file:
             yaml_file.write(yaml_content)
             yaml_file.flush()
-            
+
             with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as py_file:
                 py_file.close()
-                
+
                 try:
                     generate_stages_module(Path(yaml_file.name), Path(py_file.name))
-                    
+
                     # Verify the generated file exists and has content
                     assert Path(py_file.name).exists()
                     content = Path(py_file.name).read_text()
-                    
+
                     # Check that the generated content has expected elements
                     assert "class Stages:" in content
                     assert "class Objective:" in content
@@ -404,7 +403,7 @@ class TestPromptStagesGenerator:
                     assert "__stage_display__ = 'Global Rules'" in content
                     assert "__order_fixed__ = True" in content
                     assert "__order_index__ = 1" in content
-                    
+
                 finally:
                     # Cleanup
                     Path(yaml_file.name).unlink()
@@ -416,21 +415,21 @@ class TestPromptStagesGenerator:
         Objective:
             __doc__: "Defines the mission."
         """
-        
+
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as yaml_file:
             yaml_file.write(yaml_content)
             yaml_file.flush()
-            
+
             # Create a path with non-existent parent directories
             output_path = Path("temp_output") / "nested" / "stages.py"
-            
+
             try:
                 generate_stages_module(Path(yaml_file.name), output_path)
-                
+
                 # Verify the file was created
                 assert output_path.exists()
                 assert output_path.parent.exists()
-                
+
             finally:
                 # Cleanup
                 Path(yaml_file.name).unlink()
@@ -453,10 +452,10 @@ class TestPromptStagesGenerator:
                 "children": []
             }
         ]
-        
+
         result = emit_class_tree(nodes)
         output = "\n".join(result)
-        
+
         # Check that quotes are properly handled in the generated output
         # The generator escapes triple quotes but leaves double quotes as-is
         assert '""" This has "quotes" and \\"""triple quotes\\""" """' in output
@@ -473,14 +472,14 @@ class TestPromptStagesGenerator:
             ("", False),
             (None, False),
         ]
-        
+
         for order_val, expected in test_cases:
             node_data = {
                 "__doc__": "Test stage",
                 "order": order_val,
                 "order_index": 0
             }
-            
+
             result = _normalize_node("Test Stage", node_data, 0)
             assert result["order_fixed"] == expected, f"Failed for order={order_val}"
 
@@ -489,7 +488,7 @@ class TestPromptStagesGenerator:
         node_data = {
             "__doc__": "Test stage"
         }
-        
+
         result = _normalize_node("Test Stage", node_data, 42)
         assert result["order_index"] == 42
 

@@ -1,6 +1,7 @@
 import pytest
 
-from structured_prompt import StructuredPromptFactory, PromptSection, IndentationPreferences, PromptText
+from structured_prompt import IndentationPreferences, PromptSection, PromptText, StructuredPromptFactory
+
 from .stubs.prompt_structure import Stages
 
 

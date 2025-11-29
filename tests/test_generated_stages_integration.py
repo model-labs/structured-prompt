@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from structured_prompt import StructuredPromptFactory, PromptSection, IndentationPreferences, PromptText
+from structured_prompt import IndentationPreferences, PromptSection, PromptText, StructuredPromptFactory
 from structured_prompt.generator.prompt_structure_generator import generate_stages_module
 
 # Add src to path for imports
