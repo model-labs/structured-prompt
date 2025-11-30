@@ -112,10 +112,8 @@ def emit_class_tree(top_nodes: List[Dict[str, Any]]) -> List[str]:
     lines.append("#   --in specs/prompt_structure/prompt_structure.yaml \\")
     lines.append("#   --out src/hyper_reasoning/prompts/prompt_structure.py")
     lines.append("")
-    lines.append("from typing import Any, Tuple, Type, TYPE_CHECKING")
+    lines.append("from typing import Any, Tuple, Type")
     lines.append("")
-    lines.append("if TYPE_CHECKING:")
-    lines.append("    from typing_extensions import Self")
     lines.append("")
     lines.append("class Stages:")
     lines.append('    """Auto-generated hierarchical stage tree."""')
@@ -208,13 +206,25 @@ def emit_wiring(top_nodes: List[Dict[str, Any]]) -> List[str]:
         lines.append("")
 
     # Provide a stable tuple of top-level classes in declaration order
-    lines.append(f"Stages.__top_levels__ = ({', '.join(top_level_quals)},)")
+    if len(top_level_quals) <= 3:
+        lines.append(f"Stages.__top_levels__ = ({', '.join(top_level_quals)},)")
+    else:
+        lines.append("Stages.__top_levels__ = (")
+        for qual in top_level_quals:
+            lines.append(f"    {qual},")
+        lines.append(")")
     lines.append("")
 
     # (Optional) also expose a fixed-order list by YAML index for consumers who want it
     # Only include those with order_fixed=True; keep YAML order (by index)
     fixed_sorted = [qual for _, qual, fixed in sorted(ordered, key=lambda t: t[0]) if fixed]
-    lines.append(f"Stages.__fixed_top_order__ = ({', '.join(fixed_sorted)},)")
+    if len(fixed_sorted) <= 3:
+        lines.append(f"Stages.__fixed_top_order__ = ({', '.join(fixed_sorted)},)")
+    else:
+        lines.append("Stages.__fixed_top_order__ = (")
+        for qual in fixed_sorted:
+            lines.append(f"    {qual},")
+        lines.append(")")
     lines.append("")
     return lines
 

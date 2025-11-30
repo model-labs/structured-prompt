@@ -4,10 +4,8 @@
 #   --in specs/prompt_structure/prompt_structure.yaml \
 #   --out src/hyper_reasoning/prompts/prompt_structure.py
 
-from typing import Any, Tuple, Type, TYPE_CHECKING
+from typing import Any, Tuple, Type
 
-if TYPE_CHECKING:
-    from typing_extensions import Self
 
 class Stages:
     """Auto-generated hierarchical stage tree."""
@@ -266,6 +264,28 @@ Stages.Output.__order_index__ = 8
 
 Stages.QualityGates.__order_index__ = 9
 
-Stages.__top_levels__ = (Stages.Objective, Stages.GlobalRules, Stages.OperatingPrinciples, Stages.ToolReference, Stages.Scoping, Stages.Planning, Stages.AdaptiveExecution, Stages.ReflectAndReport, Stages.Output, Stages.QualityGates,)
+Stages.__top_levels__ = (
+    Stages.Objective,
+    Stages.GlobalRules,
+    Stages.OperatingPrinciples,
+    Stages.ToolReference,
+    Stages.Scoping,
+    Stages.Planning,
+    Stages.AdaptiveExecution,
+    Stages.ReflectAndReport,
+    Stages.Output,
+    Stages.QualityGates,
+)
 
-Stages.__fixed_top_order__ = (Stages.Objective, Stages.GlobalRules, Stages.OperatingPrinciples, Stages.ToolReference, Stages.Scoping, Stages.Planning, Stages.AdaptiveExecution, Stages.ReflectAndReport, Stages.Output, Stages.QualityGates,)
+Stages.__fixed_top_order__ = (
+    Stages.Objective,
+    Stages.GlobalRules,
+    Stages.OperatingPrinciples,
+    Stages.ToolReference,
+    Stages.Scoping,
+    Stages.Planning,
+    Stages.AdaptiveExecution,
+    Stages.ReflectAndReport,
+    Stages.Output,
+    Stages.QualityGates,
+)
