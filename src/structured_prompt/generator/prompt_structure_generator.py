@@ -4,7 +4,7 @@ import keyword
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 try:
     import yaml  # PyYAML
@@ -40,9 +40,11 @@ def _normalize_mapping_to_nodes(root_map: Dict[str, Any]) -> List[Dict[str, Any]
 def _normalize_node(name: str, d: Dict[str, Any], default_index: int) -> Dict[str, Any]:
     # Extract meta
     doc = (d.get("__doc__") or "").strip()
-    order_val = d.get("order", False)
-    if isinstance(order_val, str):
-        order_fixed = order_val.strip().lower() == "fixed"
+    order_val = d.get("order", None)  # None means use renderer default (True)
+    if order_val is None:
+        order_fixed = None  # Will not be generated, renderer will default to True
+    elif isinstance(order_val, str):
+        order_fixed = True if order_val.strip().lower() == "fixed" else False
     else:
         order_fixed = bool(order_val)
     order_index = int(d.get("order_index", default_index))
@@ -110,12 +112,18 @@ def emit_class_tree(top_nodes: List[Dict[str, Any]]) -> List[str]:
     lines.append("#   --in specs/prompt_structure/prompt_structure.yaml \\")
     lines.append("#   --out src/hyper_reasoning/prompts/prompt_structure.py")
     lines.append("")
+    lines.append("from typing import Any, Tuple, Type, TYPE_CHECKING")
+    lines.append("")
+    lines.append("if TYPE_CHECKING:")
+    lines.append("    from typing_extensions import Self")
+    lines.append("")
     lines.append("class Stages:")
     lines.append('    """Auto-generated hierarchical stage tree."""')
-    lines.append("    pass")
+    lines.append("    __top_levels__: Tuple[Type[Any], ...]")
+    lines.append("    __fixed_top_order__: Tuple[Type[Any], ...]")
     lines.append("")
 
-    def emit(node: Dict[str, Any], indent: int):
+    def emit(node: Dict[str, Any], indent: int, is_top_level: bool = False):
         cls = node["class"]
         doc = node["doc"].replace('"""', '\\"""') if node["doc"] else ""
         lines.append(" " * indent + f"class {cls}:")
@@ -125,14 +133,21 @@ def emit_class_tree(top_nodes: List[Dict[str, Any]]) -> List[str]:
             lines.append(" " * (indent + 4) + '""" """')
         # Use humanized display name instead of raw class name
         humanized_display = humanize_class_name(cls)
-        lines.append(" " * (indent + 4) + f"__stage_display__ = {humanized_display!r}")
-        lines.append(" " * (indent + 4) + "pass")
+        lines.append(" " * (indent + 4) + f"__stage_display__: str = {humanized_display!r}")
+        lines.append(" " * (indent + 4) + "__stage_root__: Type['Stages']")
+        lines.append(" " * (indent + 4) + "__stage_parent__: Type[Any]")
+        lines.append(" " * (indent + 4) + "__children__: Tuple[Type[Any], ...]")
+        if is_top_level:
+            # Only add __order_fixed__ annotation if it's explicitly set (not None)
+            if node.get("order_fixed") is not None:
+                lines.append(" " * (indent + 4) + "__order_fixed__: bool")
+            lines.append(" " * (indent + 4) + "__order_index__: int")
         lines.append("")
         for child in node["children"]:
-            emit(child, indent + 4)
+            emit(child, indent + 4, is_top_level=False)
 
     for n in top_nodes:
-        emit(n, 4)
+        emit(n, 4, is_top_level=True)
     return lines
 
 
@@ -177,15 +192,19 @@ def emit_wiring(top_nodes: List[Dict[str, Any]]) -> List[str]:
 
     # top-level order wiring and Stages.__top_levels__
     top_level_quals: List[str] = []
-    ordered: List[Tuple[int, str, bool]] = []  # (order_index, qual, fixed)
+    ordered: List[Tuple[int, str, Optional[bool]]] = []  # (order_index, qual, fixed)
     for node in top_nodes:
         qual = qname(["Stages", node["class"]])
         top_level_quals.append(qual)
-        fixed = bool(node["order_fixed"])
+        fixed = node["order_fixed"]  # Can be None, True, or False
         index = int(node["order_index"])
-        lines.append(f"{qual}.__order_fixed__ = {repr(fixed)}")
+        # Only emit __order_fixed__ if explicitly set (not None)
+        if fixed is not None:
+            lines.append(f"{qual}.__order_fixed__ = {repr(fixed)}")
         lines.append(f"{qual}.__order_index__ = {index}")
-        ordered.append((index, qual, fixed))
+        # For ordering, treat None as True (default)
+        fixed_for_ordering = True if fixed is None else bool(fixed)
+        ordered.append((index, qual, fixed_for_ordering))
         lines.append("")
 
     # Provide a stable tuple of top-level classes in declaration order

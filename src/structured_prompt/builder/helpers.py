@@ -39,7 +39,7 @@ def _try_import_generated_stages():
         tm: Dict[str, Tuple[int, bool]] = {}
         for idx, (nm, obj) in enumerate(Stages.__dict__.items()):
             if isinstance(obj, type) and hasattr(obj, "__stage_display__"):
-                fixed = bool(getattr(obj, "__order_fixed__", False))
+                fixed = bool(getattr(obj, "__order_fixed__", True))  # Default to True (fixed ordering)
                 order_index = int(getattr(obj, "__order_index__", idx))
                 class_key = nm.strip().lower()
                 display = getattr(obj, "__stage_display__", nm)

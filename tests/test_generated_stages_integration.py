@@ -116,10 +116,13 @@ class TestGeneratedStagesIntegration:
         assert self.Stages.GlobalRules.__stage_display__ == "Global Rules"
         assert self.Stages.AdaptiveExecution.__stage_display__ == "Adaptive Execution"
 
-        # Check fixed ordering
-        assert self.Stages.ToolReference.__order_fixed__ is True
+        # Check fixed ordering (default is now True when attribute is missing)
+        assert self.Stages.ToolReference.__order_fixed__ is True  # Explicitly set in YAML
         assert self.Stages.ToolReference.__order_index__ == 3
-        assert self.Stages.Objective.__order_fixed__ is False
+        # Objective doesn't have __order_fixed__, so it uses renderer default of True
+        assert not hasattr(self.Stages.Objective, '__order_fixed__')  # Not generated for default value
+        # But the renderer will treat it as True
+        assert getattr(self.Stages.Objective, '__order_fixed__', True) is True
 
         # Check top-level collections
         assert hasattr(self.Stages, "__top_levels__")
@@ -293,11 +296,11 @@ class TestGeneratedStagesIntegration:
         assert "Document in execution_log whether you took this action and why." in rendered
 
     def test_end_to_end_with_actual_yaml(self):
-        """End-to-end test: Generate stages from actual YAML file and validate prompt functionality."""
-        # Check if the actual YAML file exists
-        actual_yaml_path = Path("specs/prompt_structure/prompt_structure.yaml")
+        """End-to-end test: Generate stages from stub YAML file and validate prompt functionality."""
+        # Use the stub YAML file for testing
+        actual_yaml_path = Path("tests/stubs/structure_template.yaml")
         if not actual_yaml_path.exists():
-            pytest.skip(f"Actual YAML file not found at {actual_yaml_path}")
+            pytest.skip(f"Stub YAML file not found at {actual_yaml_path}")
 
         # Create temporary output file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as tmp_py:
@@ -411,14 +414,14 @@ class TestGeneratedStagesIntegration:
         scoping_idx = None
 
         for i, line in enumerate(lines):
-            if line.strip().startswith("1. Planning"):
-                planning_idx = i
-            elif line.strip().startswith("2. Quality Gates"):
-                quality_gates_idx = i
-            elif line.strip().startswith("3. Scoping"):
-                scoping_idx = i
-            elif line.strip().startswith("4. Tool Reference"):
+            if line.strip().startswith("1. Tool Reference"):
                 tool_reference_idx = i
+            elif line.strip().startswith("2. Scoping"):
+                scoping_idx = i
+            elif line.strip().startswith("3. Planning"):
+                planning_idx = i
+            elif line.strip().startswith("4. Quality Gates"):
+                quality_gates_idx = i
 
         # Verify all sections are found
         assert planning_idx is not None, f"Planning not found in rendered output: {rendered}"
@@ -427,10 +430,11 @@ class TestGeneratedStagesIntegration:
         assert tool_reference_idx is not None, f"Tool Reference not found in rendered output: {rendered}"
 
         # Verify sections appear in correct order
-        # Tool Reference has fixed order_index=3 (0-based), so it appears at position 4 (1-indexed display)
+        # With all stages having fixed ordering (default is now True), they appear in their order_index order
+        # ToolReference=3, Scoping=4, Planning=5, QualityGates=9
+        assert tool_reference_idx < scoping_idx
+        assert scoping_idx < planning_idx
         assert planning_idx < quality_gates_idx
-        assert quality_gates_idx < scoping_idx
-        assert scoping_idx < tool_reference_idx
 
     def test_acceptance_example_9_critical_steps(self):
         """Test acceptance example 9: Critical steps (section-level and root-level)."""
@@ -499,13 +503,16 @@ class TestGeneratedStagesIntegration:
             assert hasattr(stage, "__stage_parent__")
             assert hasattr(stage, "__children__")
             assert hasattr(stage, "__stage_display__")
-            assert hasattr(stage, "__order_fixed__")
+            # __order_fixed__ is only present if explicitly set (not default)
+            # Only ToolReference has it explicitly set
             assert hasattr(stage, "__order_index__")
 
             # Verify metadata values
             assert stage.__stage_root__ == self.Stages
             assert stage.__stage_parent__ == self.Stages
-            assert isinstance(stage.__order_fixed__, bool)
+            # __order_fixed__ uses renderer default of True if not present
+            order_fixed = getattr(stage, "__order_fixed__", True)
+            assert isinstance(order_fixed, bool)
             assert isinstance(stage.__order_index__, int)
 
         # Check nested stages have correct metadata
@@ -520,13 +527,16 @@ class TestGeneratedStagesIntegration:
         assert self.Stages.ToolReference.__order_fixed__ is True
         assert self.Stages.ToolReference.__order_index__ == 3
 
-        # Check that other stages are not fixed order
-        assert self.Stages.Objective.__order_fixed__ is False
-        assert self.Stages.Scoping.__order_fixed__ is False
+        # Check that other stages don't have __order_fixed__ (use renderer default of True)
+        assert not hasattr(self.Stages.Objective, '__order_fixed__')
+        assert not hasattr(self.Stages.Scoping, '__order_fixed__')
+        # But renderer treats missing as True
+        assert getattr(self.Stages.Objective, '__order_fixed__', True) is True
+        assert getattr(self.Stages.Scoping, '__order_fixed__', True) is True
 
         # Check top-level collections
         assert len(self.Stages.__top_levels__) == 9  # All top-level stages
-        assert len(self.Stages.__fixed_top_order__) == 1  # Only ToolReference
+        assert len(self.Stages.__fixed_top_order__) == 9  # All stages are fixed by default now
         assert self.Stages.ToolReference in self.Stages.__fixed_top_order__
 
     def test_generated_stages_with_custom_indentation(self):

@@ -4,109 +4,166 @@
 #   --in specs/prompt_structure/prompt_structure.yaml \
 #   --out src/hyper_reasoning/prompts/prompt_structure.py
 
+from typing import Any, Tuple, Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 class Stages:
     """Auto-generated hierarchical stage tree."""
-    pass
+    __top_levels__: Tuple[Type[Any], ...]
+    __fixed_top_order__: Tuple[Type[Any], ...]
 
     class Objective:
         """ Defines the mission of the investigation and the boundaries of success. Describes what must be achieved, not how to achieve it. """
-        __stage_display__ = 'Objective'
-        pass
+        __stage_display__: str = 'Objective'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_index__: int
 
     class GlobalRules:
         """ Declares top-level constraints and priority principles that supersede other instructions. Ensures the investigation remains within intended boundaries. """
-        __stage_display__ = 'Global Rules'
-        pass
+        __stage_display__: str = 'Global Rules'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_index__: int
 
     class OperatingPrinciples:
         """ Captures expected reasoning and behavior throughout the investigation, including tool supervision, scope discipline, and outcome orientation. """
-        __stage_display__ = 'Operating Principles'
-        pass
+        __stage_display__: str = 'Operating Principles'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_index__: int
 
     class ToolReference:
         """ Serves as a catalog of available tools with their high-level purposes and inputs, enabling informed tool selection during planning and execution. """
-        __stage_display__ = 'Tool Reference'
-        pass
+        __stage_display__: str = 'Tool Reference'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_fixed__: bool
+        __order_index__: int
 
     class Scoping:
         """ Records what is in and out of scope for the incident. Establishes the focus areas and limits for subsequent analysis. """
-        __stage_display__ = 'Scoping'
-        pass
+        __stage_display__: str = 'Scoping'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_index__: int
 
     class Planning:
         """ Outlines the intended approach to meet the objective, including chosen methods and criteria for determining success or failure. """
-        __stage_display__ = 'Planning'
-        pass
+        __stage_display__: str = 'Planning'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_index__: int
 
     class AdaptiveExecution:
         """ Describes how and when to adjust the plan based on emerging findings, including whether to broaden or narrow the focus and when to revisit prior steps. """
-        __stage_display__ = 'Adaptive Execution'
-        pass
+        __stage_display__: str = 'Adaptive Execution'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_index__: int
 
         class AdaptiveExecutionRule:
             """ States the governing rule for inserting, skipping, or repeating steps during execution. """
-            __stage_display__ = 'Adaptive Execution Rule'
-            pass
+            __stage_display__: str = 'Adaptive Execution Rule'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
         class ToolScopeSpecification:
             """ Defines how to select between broad exploration and deep focus given current evidence. """
-            __stage_display__ = 'Tool Scope Specification'
-            pass
+            __stage_display__: str = 'Tool Scope Specification'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
         class BeforeToolExecution:
             """ States the preparation expectations before invoking a tool, including clarity of objective, scope, and relevant prior context. """
-            __stage_display__ = 'Before Tool Execution'
-            pass
+            __stage_display__: str = 'Before Tool Execution'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
         class AfterToolExecution:
             """ States how results should be validated and how the plan should be adjusted in response to tool outputs. """
-            __stage_display__ = 'After Tool Execution'
-            pass
+            __stage_display__: str = 'After Tool Execution'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
         class ToolReengagement:
             """ Defines when to re-engage specific investigators or tools for targeted analysis. """
-            __stage_display__ = 'Tool Reengagement'
-            pass
+            __stage_display__: str = 'Tool Reengagement'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
         class SpecialCases:
             """ Collects predefined exception-handling patterns for unusual conditions, with an emphasis on explicit justification. """
-            __stage_display__ = 'Special Cases'
-            pass
+            __stage_display__: str = 'Special Cases'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
     class ReflectAndReport:
         """ Synthesizes findings into a coherent account, consolidating evidence, timelines, and causal relationships across sources. """
-        __stage_display__ = 'Reflect And Report'
-        pass
+        __stage_display__: str = 'Reflect And Report'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_index__: int
 
         class Finalization:
             """ Closes the investigation record by updating name, summary, and status, and ensuring unrelated items are removed. """
-            __stage_display__ = 'Finalization'
-            pass
+            __stage_display__: str = 'Finalization'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
     class Output:
         """ Groups the schema and conventions for the user-facing result. """
-        __stage_display__ = 'Output'
-        pass
+        __stage_display__: str = 'Output'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_index__: int
 
         class OutputTemplate:
             """ Specifies the required sections and structure of the final summary. """
-            __stage_display__ = 'Output Template'
-            pass
+            __stage_display__: str = 'Output Template'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
         class OutputTemplateRules:
             """ Specifies formatting and structural conventions for the final summary. """
-            __stage_display__ = 'Output Template Rules'
-            pass
+            __stage_display__: str = 'Output Template Rules'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
     class QualityGates:
         """ Represents the final quality verification concept to confirm completeness, coherence, and defensibility of the delivered output. """
-        __stage_display__ = 'Quality Gates'
-        pass
+        __stage_display__: str = 'Quality Gates'
+        __stage_root__: Type['Stages']
+        __stage_parent__: Type[Any]
+        __children__: Tuple[Type[Any], ...]
+        __order_index__: int
 
         class DefinitionOfDone:
             """ Conditions that must be met before the job can be considered done. """
-            __stage_display__ = 'Definition Of Done'
-            pass
+            __stage_display__: str = 'Definition Of Done'
+            __stage_root__: Type['Stages']
+            __stage_parent__: Type[Any]
+            __children__: Tuple[Type[Any], ...]
 
 Stages.Objective.__stage_root__ = Stages
 Stages.Objective.__stage_parent__ = Stages
@@ -188,36 +245,27 @@ Stages.QualityGates.DefinitionOfDone.__stage_root__ = Stages
 Stages.QualityGates.DefinitionOfDone.__stage_parent__ = Stages.QualityGates
 Stages.QualityGates.DefinitionOfDone.__children__ = ()
 
-Stages.Objective.__order_fixed__ = False
 Stages.Objective.__order_index__ = 0
 
-Stages.GlobalRules.__order_fixed__ = False
 Stages.GlobalRules.__order_index__ = 1
 
-Stages.OperatingPrinciples.__order_fixed__ = False
 Stages.OperatingPrinciples.__order_index__ = 2
 
 Stages.ToolReference.__order_fixed__ = True
 Stages.ToolReference.__order_index__ = 3
 
-Stages.Scoping.__order_fixed__ = False
 Stages.Scoping.__order_index__ = 4
 
-Stages.Planning.__order_fixed__ = False
 Stages.Planning.__order_index__ = 5
 
-Stages.AdaptiveExecution.__order_fixed__ = False
 Stages.AdaptiveExecution.__order_index__ = 6
 
-Stages.ReflectAndReport.__order_fixed__ = False
 Stages.ReflectAndReport.__order_index__ = 7
 
-Stages.Output.__order_fixed__ = False
 Stages.Output.__order_index__ = 8
 
-Stages.QualityGates.__order_fixed__ = False
 Stages.QualityGates.__order_index__ = 9
 
 Stages.__top_levels__ = (Stages.Objective, Stages.GlobalRules, Stages.OperatingPrinciples, Stages.ToolReference, Stages.Scoping, Stages.Planning, Stages.AdaptiveExecution, Stages.ReflectAndReport, Stages.Output, Stages.QualityGates,)
 
-Stages.__fixed_top_order__ = (Stages.ToolReference,)
+Stages.__fixed_top_order__ = (Stages.Objective, Stages.GlobalRules, Stages.OperatingPrinciples, Stages.ToolReference, Stages.Scoping, Stages.Planning, Stages.AdaptiveExecution, Stages.ReflectAndReport, Stages.Output, Stages.QualityGates,)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Sequence, Tuple, Union, cast
@@ -294,7 +295,7 @@ class PromptSection(Item):
             lines.append(hang + "!!! END MANDATORY STEP !!!")
 
         if self.subtitle:
-            lines.append(hang + self.subtitle)
+            lines.append(hang + inspect.cleandoc(self.subtitle))
 
         next_level = level + 1
         children_ignore = self.bullet_style is None or len(self.items) == 1

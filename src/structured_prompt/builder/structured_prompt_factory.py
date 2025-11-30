@@ -57,7 +57,7 @@ class StructuredPromptFactory(PromptSection):
 
         for idx, (nm, obj) in enumerate(stages_root.__dict__.items()):
             if isinstance(obj, type) and hasattr(obj, "__stage_display__"):
-                fixed = bool(getattr(obj, "__order_fixed__", False))
+                fixed = bool(getattr(obj, "__order_fixed__", True))  # Default to True (fixed ordering)
                 order_index = int(getattr(obj, "__order_index__", idx))
                 class_key = nm.strip().lower()
                 display = getattr(obj, "__stage_display__", nm)
@@ -71,7 +71,7 @@ class StructuredPromptFactory(PromptSection):
         if not _is_stage_class(cls):
             return
 
-        fixed = bool(getattr(cls, "__order_fixed__", False))
+        fixed = bool(getattr(cls, "__order_fixed__", True))  # Default to True (fixed ordering)
         order_index = int(getattr(cls, "__order_index__", 0))
 
         class_key = cls.__name__.strip().lower()

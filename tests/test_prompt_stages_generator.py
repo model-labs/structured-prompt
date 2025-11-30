@@ -93,7 +93,7 @@ class TestPromptStagesGenerator:
         assert result[0]["display"] == "Objective"
         assert result[0]["class"] == "Objective"
         assert result[0]["doc"] == "Defines the mission."
-        assert result[0]["order_fixed"] is False
+        assert result[0]["order_fixed"] is False  # Explicitly set to False in test data
         assert result[0]["order_index"] == 0
 
         assert result[1]["display"] == "Global Rules"
@@ -118,7 +118,7 @@ class TestPromptStagesGenerator:
         assert result["display"] == "Parent Stage"
         assert result["class"] == "ParentStage"
         assert result["doc"] == "Parent stage"
-        assert result["order_fixed"] is False
+        assert result["order_fixed"] is False  # Explicitly set to False in test data
         assert result["order_index"] == 0
         assert len(result["children"]) == 1
         assert result["children"][0]["display"] == "Child Stage"
@@ -181,8 +181,10 @@ class TestPromptStagesGenerator:
         output = "\n".join(result)
         assert "class Objective:" in output
         assert '""" Defines the mission. """' in output
-        assert "__stage_display__ = 'Objective'" in output
-        assert "pass" in output
+        assert "__stage_display__: str = 'Objective'" in output
+        assert "__stage_root__: Type['Stages']" in output
+        assert "__stage_parent__: Type[Any]" in output
+        assert "__children__: Tuple[Type[Any], ...]" in output
 
     def test_emit_class_tree_with_children(self):
         """Test emitting class tree with nested children."""
@@ -399,10 +401,13 @@ class TestPromptStagesGenerator:
                     assert "class Stages:" in content
                     assert "class Objective:" in content
                     assert "class GlobalRules:" in content
-                    assert "__stage_display__ = 'Objective'" in content
-                    assert "__stage_display__ = 'Global Rules'" in content
-                    assert "__order_fixed__ = True" in content
-                    assert "__order_index__ = 1" in content
+                    assert "__stage_display__: str = 'Objective'" in content
+                    assert "__stage_display__: str = 'Global Rules'" in content
+                    assert "__order_fixed__: bool" in content
+                    assert "__order_index__: int" in content
+                    # Also check runtime assignment
+                    assert "Stages.GlobalRules.__order_fixed__ = True" in content
+                    assert "Stages.GlobalRules.__order_index__ = 1" in content
 
                 finally:
                     # Cleanup
@@ -470,7 +475,7 @@ class TestPromptStagesGenerator:
             (False, False),
             ("false", False),
             ("", False),
-            (None, False),
+            (None, None),  # None means use renderer default (True), so not generated
         ]
 
         for order_val, expected in test_cases:

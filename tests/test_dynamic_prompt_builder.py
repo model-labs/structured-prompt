@@ -213,14 +213,14 @@ class TestDynamicPromptBuilder:
         scoping_idx = None
 
         for i, line in enumerate(lines):
-            if line.strip().startswith("1. Planning"):
-                planning_idx = i
-            elif line.strip().startswith("2. Quality Gates"):
-                quality_gates_idx = i
-            elif line.strip().startswith("3. Scoping"):
-                scoping_idx = i
-            elif line.strip().startswith("4. Tool Reference"):
+            if line.strip().startswith("1. Tool Reference"):
                 tool_reference_idx = i
+            elif line.strip().startswith("2. Scoping"):
+                scoping_idx = i
+            elif line.strip().startswith("3. Planning"):
+                planning_idx = i
+            elif line.strip().startswith("4. Quality Gates"):
+                quality_gates_idx = i
 
         # Verify all sections are found
         assert planning_idx is not None, "Planning section not found"
@@ -229,11 +229,12 @@ class TestDynamicPromptBuilder:
         assert scoping_idx is not None, "Scoping section not found"
 
         # Verify the order matches expectations
-        # Tool Reference has fixed order_index=3 (0-based), so it appears at position 4 (1-indexed display)
-        # The order should be: Planning (1), Quality Gates (2), Scoping (3), Tool Reference (4)
+        # With all stages having fixed ordering (default is now True), they appear in their order_index order
+        # ToolReference=3, Scoping=4, Planning=5, QualityGates=9
+        # So the order should be: Tool Reference (1), Scoping (2), Planning (3), Quality Gates (4)
+        assert tool_reference_idx < scoping_idx
+        assert scoping_idx < planning_idx
         assert planning_idx < quality_gates_idx
-        assert quality_gates_idx < scoping_idx
-        assert scoping_idx < tool_reference_idx
 
     def test_9_critical_steps_section_level_and_root_level(self):
         """Test that add_critical_step renders mandatory blocks at section and root levels."""
@@ -339,10 +340,12 @@ class TestDynamicPromptBuilder:
         rendered = prompt.render_prompt()
 
         # Verify both stages are rendered
-        assert "1. Output" in rendered
-        assert "Canonical content" in rendered
-        assert "2. Custom Stage" in rendered
+        # With fixed ordering (default is now True), Output has a fixed position (order_index=8)
+        # so CustomStage (arbitrary, no fixed position) comes first
+        assert "1. Custom Stage" in rendered
         assert "Custom content" in rendered
+        assert "2. Output" in rendered
+        assert "Canonical content" in rendered
 
     def test_nested_arbitrary_stages(self):
         """Test nested arbitrary stages."""
